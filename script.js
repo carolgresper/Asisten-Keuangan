@@ -171,6 +171,41 @@ function updateAnalisisKeuangan() {
     });
 }
 
+// Fungsi untuk mengunduh laporan dalam format CSV
+function downloadCSV() {
+    const csvRows = [];
+    const headers = ['Deskripsi', 'Jumlah', 'Tanggal', 'Waktu', 'Saldo'];
+    csvRows.push(headers.join(','));
+
+    let saldoTemp = 0;
+
+    laporan.forEach(item => {
+        if (item.type === 'pemasukan') {
+            saldoTemp += item.jumlah;
+        } else {
+            saldoTemp -= item.jumlah;
+        }
+
+        const row = [
+            item.deskripsi,
+            `Rp${item.jumlah.toLocaleString('id-ID')}`,
+            item.tanggal,
+            item.waktu,
+            `Rp${saldoTemp.toLocaleString('id-ID')}`
+        ];
+        csvRows.push(row.join(','));
+    });
+
+    // Buat objek Blob untuk file CSV
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'laporan_keuangan.csv');
+    a.click();
+    URL.revokeObjectURL(url); // Lepaskan URL setelah digunakan
+}
+
 // Inisialisasi data dan update grafik saat halaman pertama kali dimuat
 document.addEventListener('DOMContentLoaded', () => {
     laporan = JSON.parse(localStorage.getItem('laporan')) || [];
